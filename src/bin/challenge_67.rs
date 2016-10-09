@@ -27,7 +27,7 @@ fn main() {
     env_logger::init().unwrap();
 
     let filename = format!("{}/data/problem_067_triangle.txt",
-        env!("CARGO_MANIFEST_DIR"));
+                           env!("CARGO_MANIFEST_DIR"));
     let triangle = parse_triangle(&filename);
 
     let total = frontier_reduce(triangle);
