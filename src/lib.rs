@@ -1,6 +1,12 @@
+#![feature(test)]
+
 #[macro_use]
 extern crate log;
+extern crate test;
 
+mod primes;
+
+pub use primes::{ErosthenesSeive, primes};
 use std::cmp::max;
 
 
