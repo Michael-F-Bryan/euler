@@ -17,6 +17,7 @@
 
 fn main() {
     let d = sum_square_difference(100);
+    assert_eq!(d, 25164150);
     println!("{}", d);
 }
 
