@@ -14,7 +14,7 @@
 use std::iter::Iterator;
 
 fn main() {
-    let triples = pythag_triples(500);
+    let triples = pythag_triples(1000);
 
     let specials: Vec<_> = triples.iter()
         .filter(|&triple| {
@@ -31,8 +31,6 @@ fn main() {
 
 
 /// Extremely naive way of generating pythagorean triples.
-///
-/// Do not use for n > 1000!!!!111
 fn pythag_triples(n: u32) -> Vec<(u32, u32, u32)> {
     let mut triples = vec![];
     for i in 1...n {

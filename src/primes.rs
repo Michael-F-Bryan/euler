@@ -27,7 +27,6 @@ impl ErosthenesSeive {
         self.numbers[0] = false;
         self.numbers[1] = false;
 
-        // Only need to count up to the sqrt of the length
         for i in 2..self.numbers.len() {
             // Skip composite numbers
             if !self.numbers[i] {
@@ -35,9 +34,10 @@ impl ErosthenesSeive {
             }
 
             // Otherwise, mark the multiples of this number as false
-            let limit = self.numbers.len() / i;
-            for j in 2..limit {
+            let mut j = 2;
+            while i*j < self.numbers.len() {
                 self.numbers[i * j] = false;
+                j += 1;
             }
         }
     }
@@ -71,6 +71,7 @@ pub fn primes(n: usize) -> Vec<usize> {
         if *is_prime {
             v.push(i);
         }
+
     }
 
     v

@@ -59,12 +59,16 @@ fn execute_binaries(binaries: Vec<Challenge>, as_release: bool) {
     let mut base_command = Command::new("cargo");
 
     let cmd = if as_release {
-        base_command.arg("build")
-    } else {
         base_command.arg("build").arg("--release")
+    } else {
+        base_command.arg("build")
     };
 
+    println!("{}", Green.paint("Re-compiling"));
+    let start = time::now();
     cmd.output().expect("Build failed!");
+    let duration = time::now() - start;
+    println!("compilation took {}ms", duration.num_milliseconds());
 
     for challenge in binaries {
         challenge.execute(as_release);
