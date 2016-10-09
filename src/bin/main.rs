@@ -1,5 +1,9 @@
 //! A binary that will find all completed challenges and run them.
-#![feature(box_syntax)]
+//!
+//! It works by first reading the /src/bin/ folder and finding any files
+//! matching "challenge_*.rs". Then it will invoke `cargo run --bin {}`
+//! for each challenge, while also printing out a bit of the challenge's
+//! docstring for context.
 
 extern crate regex;
 extern crate ansi_term;
@@ -9,7 +13,7 @@ const PACKAGE_ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 use std::fs;
 use std::path::Path;
 use std::io::Read;
-use std::process::{Command, Output};
+use std::process::Command;
 
 use ansi_term::Style;
 use ansi_term::Colour::*;
@@ -31,17 +35,13 @@ fn get_binaries() -> Vec<Challenge> {
         let path = dir_entry.unwrap().path();
         let path: &str = path.to_str().unwrap();
 
-        match pattern.captures(path) {
-            Some(caps) => {
-                let c = Challenge {
-                    path: path.to_string(),
-                    name: caps.at(1).unwrap().to_string(),
-                };
-                challenges.push(c);
-            }
-
-            None => ()
-        }
+        if let Some(caps) = pattern.captures(path) {
+            let c = Challenge {
+                path: path.to_string(),
+                name: caps.at(1).unwrap().to_string(),
+            };
+            challenges.push(c);
+        };
     }
 
     challenges
@@ -66,16 +66,16 @@ impl Challenge {
     fn read_docstring(&self) -> String {
         let mut f = fs::File::open(&self.path).unwrap();
         let mut contents = String::new();
-        f.read_to_string(&mut contents);
+        f.read_to_string(&mut contents).unwrap();
 
         let mut docstring = contents.lines()
-        .filter(|line| line.starts_with("//!"))
-        .take(16)
-        .fold(String::new(), |mut s, line| {
-            s.push_str(line);
-            s.push('\n');
-            s
-        });
+            .filter(|line| line.starts_with("//!"))
+            .take(16)
+            .fold(String::new(), |mut s, line| {
+                s.push_str(line);
+                s.push('\n');
+                s
+            });
 
         docstring = docstring.replace("//! ", "");
         docstring.replace("//!", "")
@@ -92,13 +92,13 @@ impl Challenge {
 
         // Then execute `cargo run --bin {}`
         let output = Command::new("cargo")
-                .arg("run")
-                .arg("--bin")
-                .arg(&self.name)
-                .output()
-                .expect(&format!("Failed to run {}", self.name));
+            .arg("run")
+            .arg(&self.name)
+            .arg("--bin")
+            .output()
+            .expect(&format!("Failed to run {}", self.name));
 
-        println!("{}", Style::new().bold().paint("Solution:"));
+        println!("{}", Blue.bold().paint("Solution:"));
 
         let stdout = String::from_utf8(output.stdout).unwrap();
         println!("{}", stdout);
