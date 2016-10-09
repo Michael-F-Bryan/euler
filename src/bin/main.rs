@@ -15,7 +15,6 @@ use std::path::Path;
 use std::io::Read;
 use std::process::Command;
 
-use ansi_term::Style;
 use ansi_term::Colour::*;
 
 
@@ -27,7 +26,7 @@ fn main() {
 
 /// Read the /src/bin/ directory and grab any file matching "challenge_*.rs".
 fn get_binaries() -> Vec<Challenge> {
-    let pattern = regex::Regex::new(r"(challenge_\d+).rs$").unwrap();
+    let pattern = regex::Regex::new(r"challenge_(\d+).rs$").unwrap();
     let challenge_directory = Path::new(PACKAGE_ROOT).join("src/bin");
 
     let mut challenges = vec![];
@@ -36,14 +35,19 @@ fn get_binaries() -> Vec<Challenge> {
         let path: &str = path.to_str().unwrap();
 
         if let Some(caps) = pattern.captures(path) {
+            let num = caps.at(1).unwrap();
+            let name = format!("challenge_{}", num);
             let c = Challenge {
                 path: path.to_string(),
-                name: caps.at(1).unwrap().to_string(),
+                name: name,
+                number: num.parse().unwrap(),
             };
             challenges.push(c);
         };
     }
 
+    // Sort according to the challenge's name
+    challenges.sort_by(|a, b| a.number.cmp(&b.number));
     challenges
 }
 
@@ -59,6 +63,7 @@ fn execute_binaries(binaries: Vec<Challenge>) {
 struct Challenge {
     path: String,
     name: String,
+    number: usize,
 }
 
 impl Challenge {

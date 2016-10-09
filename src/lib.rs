@@ -85,6 +85,15 @@ impl Iterator for Fibonacci {
 }
 
 
+/// Check if a number is a palindrome.
+pub fn is_palindrome(n: usize) -> bool {
+    let as_str = format!("{}", n);
+    let forwards = as_str.chars();
+    let backwards = as_str.chars().rev();
+    forwards.zip(backwards).all(|(a, b)| a == b)
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,5 +112,23 @@ mod tests {
         let fib = Fibonacci::new();
         let got: Vec<_> = fib.take(should_be.len()).collect();
         assert_eq!(got, should_be);
+    }
+
+    #[test]
+    fn odd_palindrome_check() {
+        let n = 12321;
+        assert!(is_palindrome(n));
+    }
+
+    #[test]
+    fn even_palindrome_check() {
+        let n = 123321;
+        assert!(is_palindrome(n));
+    }
+
+    #[test]
+    fn not_a_palindrome() {
+        let n = 1234;
+        assert!(!is_palindrome(n));
     }
 }
