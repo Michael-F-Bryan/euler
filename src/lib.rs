@@ -30,15 +30,46 @@ pub fn frontier_reduce(mut triangle: Vec<Vec<usize>>) -> usize {
 }
 
 
+pub struct Fibonacci {
+    first: usize,
+    second: usize,
+}
+
+impl Fibonacci {
+    pub fn new() -> Fibonacci {
+        Fibonacci{first: 1, second: 1}
+    }
+}
+
+impl Iterator for Fibonacci {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<usize> {
+        let ret = self.first;
+        self.first = self.second;
+        self.second = ret + self.first;
+        Some(ret)
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn frontier_reduce_using_sample() {
-        let mut triangle = vec![vec![3], vec![7, 4], vec![2, 4, 6], vec![8, 5, 9, 3]];
+        let triangle = vec![vec![3], vec![7, 4], vec![2, 4, 6], vec![8, 5, 9, 3]];
         let should_be = 23;
         let got = frontier_reduce(triangle);
         assert_eq!(should_be, got);
+    }
+
+    #[test]
+    fn basic_fib() {
+        let should_be = vec![1, 1, 2, 3, 5, 8, 13];
+        let fib = Fibonacci::new();
+        let got: Vec<_> = fib.take(should_be.len()).collect();
+        assert_eq!(got, should_be);
     }
 }
