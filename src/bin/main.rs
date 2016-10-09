@@ -21,7 +21,8 @@ use ansi_term::Colour::*;
 
 fn main() {
     let binaries = get_binaries();
-    execute_binaries(binaries);
+    let as_release = true;
+    execute_binaries(binaries, as_release);
 }
 
 
@@ -53,9 +54,20 @@ fn get_binaries() -> Vec<Challenge> {
 }
 
 
-fn execute_binaries(binaries: Vec<Challenge>) {
+fn execute_binaries(binaries: Vec<Challenge>, as_release: bool) {
+    // Make sure everything is compiled
+    let mut base_command = Command::new("cargo");
+
+    let cmd = if as_release {
+        base_command.arg("build")
+    } else {
+        base_command.arg("build").arg("--release")
+    };
+
+    cmd.output().expect("Build failed!");
+
     for challenge in binaries {
-        challenge.execute();
+        challenge.execute(as_release);
     }
 }
 
@@ -88,7 +100,7 @@ impl Challenge {
 
     }
 
-    fn execute(&self) {
+    fn execute(&self, as_release: bool) {
         // First print the challenge's name
         println!("--------");
         println!("{} {}", Green.bold().paint("Running challenge:"), self.name);
@@ -96,13 +108,14 @@ impl Challenge {
         // Then print a bit of description about the challenge
         println!("{}", self.read_docstring());
 
+        let path = format!("{}/target/{}/{}",
+                           PACKAGE_ROOT,
+                           if as_release { "release" } else { "debug" },
+                           self.name);
+
         // Then execute `cargo run --bin {}`
         let start = time::now();
-        let output = Command::new("cargo")
-            .arg("run")
-            .arg(&self.name)
-            .arg("--bin")
-            .arg(&self.name)
+        let output = Command::new(&path)
             .output()
             .expect(&format!("Failed to run {}", self.name));
         let end = time::now();
