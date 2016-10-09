@@ -1,0 +1,8 @@
+[package]
+name = "euler"
+version = "0.1.0"
+authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
+
+[dependencies]
+env_logger = "*"
+log = "*"
