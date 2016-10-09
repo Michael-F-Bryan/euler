@@ -13,7 +13,7 @@ fn main() {
 
     for i in 100..1000 {
         for j in 100..1000 {
-            let res = i*j;
+            let res = i * j;
             if is_palindrome(res) && res > largest_palindrome {
                 largest_palindrome = res;
             }

@@ -7,6 +7,7 @@
 
 extern crate regex;
 extern crate ansi_term;
+extern crate time;
 
 const PACKAGE_ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 
@@ -96,16 +97,26 @@ impl Challenge {
         println!("{}", self.read_docstring());
 
         // Then execute `cargo run --bin {}`
+        let start = time::now();
         let output = Command::new("cargo")
             .arg("run")
             .arg(&self.name)
             .arg("--bin")
+            .arg(&self.name)
             .output()
             .expect(&format!("Failed to run {}", self.name));
+        let end = time::now();
 
         println!("{}", Blue.bold().paint("Solution:"));
 
         let stdout = String::from_utf8(output.stdout).unwrap();
         println!("{}", stdout);
+
+        let duration = end - start;
+        println!("{} {}ms",
+                 Green.paint("Running time:"),
+                 duration.num_milliseconds());
+
+        println!("");
     }
 }

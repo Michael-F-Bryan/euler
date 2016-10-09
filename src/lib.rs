@@ -19,7 +19,7 @@ extern crate regex;
 
 mod primes;
 
-use std::cmp::max;
+use std::cmp::{max, min};
 
 pub use primes::{ErosthenesSeive, primes};
 
@@ -94,6 +94,24 @@ pub fn is_palindrome(n: usize) -> bool {
 }
 
 
+/// Calculate the greatest common divisor of two numbers.
+pub fn greatest_common_divisor(a: usize, b: usize) -> usize {
+    let (mut a, mut b) = (min(a, b), max(a, b));
+
+    while b > 0 {
+        let tmp = a;
+        a = b;
+        b = tmp % b;
+    }
+    a
+}
+
+/// Calculate the lowest common multiple of two numbers.
+pub fn lowest_common_multiple(a: usize, b: usize) -> usize {
+    a * b / greatest_common_divisor(a, b)
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -130,5 +148,22 @@ mod tests {
     fn not_a_palindrome() {
         let n = 1234;
         assert!(!is_palindrome(n));
+    }
+
+    #[test]
+    fn basic_gcm() {
+        let (a, b) = (10, 8);
+        let should_be = 2;
+        let got = greatest_common_divisor(a, b);
+        assert_eq!(got, should_be);
+    }
+
+    #[test]
+    fn basic_lcm() {
+        let a = 5;
+        let b = 6;
+        let should_be = 30;
+        let got = lowest_common_multiple(a, b);
+        assert_eq!(got, should_be);
     }
 }
