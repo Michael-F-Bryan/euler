@@ -33,7 +33,7 @@ fn main() {
     let triangle = parse_triangle(&filename);
 
     let total = frontier_reduce(triangle);
-    println!("Total: {}", total);
+    println!("{}", total);
 }
 
 fn parse_triangle(filename: &str) -> Vec<Vec<usize>> {

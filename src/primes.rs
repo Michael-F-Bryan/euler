@@ -3,6 +3,7 @@
 
 /// A seive of Erosthenes. Modelled as a vector of bools where the index
 /// indicates whether that number is prime or not.
+#[derive(Debug)]
 pub struct ErosthenesSeive {
     numbers: Vec<bool>,
 }
@@ -10,11 +11,17 @@ pub struct ErosthenesSeive {
 impl ErosthenesSeive {
     /// Create a seive which will find primes up to and including `n`.
     fn new(n: usize) -> ErosthenesSeive {
-        ErosthenesSeive {
-            numbers: vec![true; n+1]
+        if (n as f64) > 10e9 {
+            // Because the seive stores everything in RAM instead of
+            // segmenting it, we'd be allocating a Vec of approximately
+            // 1*10^9 integers
+            panic!("Seive size won't fit in RAM");
         }
+
+        ErosthenesSeive { numbers: vec![true; n+1] }
     }
 
+    /// Iterate through the seive, marking all composite numbers as false.
     pub fn solve(&mut self) {
         // Set 0 and 1 to false because they aren't prime
         self.numbers[0] = false;
@@ -24,21 +31,23 @@ impl ErosthenesSeive {
         for i in 2..self.numbers.len() {
             // Skip composite numbers
             if !self.numbers[i] {
-                continue
+                continue;
             }
 
             // Otherwise, mark the multiples of this number as false
-            let limit = self.numbers.len()/i;
+            let limit = self.numbers.len() / i;
             for j in 2..limit {
-                self.numbers[i*j] = false;
+                self.numbers[i * j] = false;
             }
         }
     }
 
+    /// Get the contents of the seive.
     pub fn numbers(&self) -> &[bool] {
         &self.numbers
     }
 
+    /// Check if a number is prime.
     pub fn is_prime(&self, n: usize) -> Result<bool, String> {
         if n < self.numbers.len() {
             Ok(self.numbers[n])
@@ -51,6 +60,7 @@ impl ErosthenesSeive {
 }
 
 
+/// Generate a vector of all the primes up to and including `n`.
 pub fn primes(n: usize) -> Vec<usize> {
     let mut seive = ErosthenesSeive::new(n);
     seive.solve();

@@ -18,8 +18,8 @@ fn main() {
     let fib = Fibonacci::new();
 
     let sum = fib.take_while(|i| *i < 4_000_000)
-    .filter(|i| i % 2 == 0)
-    .fold(0, |acc, i| acc+i);
+        .filter(|i| i % 2 == 0)
+        .fold(0, |acc, i| acc + i);
 
     println!("{}", sum);
 

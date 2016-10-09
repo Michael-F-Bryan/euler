@@ -1,13 +1,27 @@
+//! A crate containing all the utility functions needed to work on
+//! Project Euler challenges.
+
+
 #![feature(test)]
 
+// Add some more lints
+#![deny(missing_docs,
+        missing_debug_implementations, missing_copy_implementations,
+        trivial_casts, trivial_numeric_casts,
+        unsafe_code,
+        unused_import_braces, unused_qualifications)]
+
+// Imported crates
 #[macro_use]
 extern crate log;
 extern crate test;
+extern crate regex;
 
 mod primes;
 
-pub use primes::{ErosthenesSeive, primes};
 use std::cmp::max;
+
+pub use primes::{ErosthenesSeive, primes};
 
 
 /// Using the frontier method, find the maximum path through a triangle
@@ -36,14 +50,26 @@ pub fn frontier_reduce(mut triangle: Vec<Vec<usize>>) -> usize {
 }
 
 
+/// An iterator over the fibonacci numbers.
+#[derive(Debug, Copy, Clone)]
 pub struct Fibonacci {
     first: usize,
     second: usize,
 }
 
 impl Fibonacci {
+    /// Create a new fibonacci
     pub fn new() -> Fibonacci {
-        Fibonacci{first: 1, second: 1}
+        Self::default()
+    }
+}
+
+impl Default for Fibonacci {
+    fn default() -> Fibonacci {
+        Fibonacci {
+            first: 1,
+            second: 1,
+        }
     }
 }
 

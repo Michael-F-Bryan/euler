@@ -6,3 +6,5 @@ authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
 [dependencies]
 env_logger = "*"
 log = "*"
+regex = "*"
+ansi_term = "*"
