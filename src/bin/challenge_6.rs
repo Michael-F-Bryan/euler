@@ -24,7 +24,7 @@ fn main() {
 fn sum_square_difference(n: usize) -> usize {
     let sum: usize = (1...n).sum();
     let sum_square = sum.pow(2);
-    let square_sum: usize = (1...n).map(|i| i*i).sum();
+    let square_sum: usize = (1...n).map(|i| i * i).sum();
     sum_square - square_sum
 }
 
