@@ -36,9 +36,9 @@ use euler::frontier_reduce;
 
 
 fn main() {
-    env_logger::init();
+    env_logger::init().unwrap();
 
-    let mut triangle = vec![
+    let triangle = vec![
             vec![75],
             vec![95, 64],
             vec![17, 47, 82],
