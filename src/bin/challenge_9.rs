@@ -9,12 +9,12 @@
 //! There exists exactly one Pythagorean triplet for which a + b + c = 1000.
 //! Find the product abc.
 
-#![feature(inclusive_range_syntax)]
+extern crate euler;
 
 use std::iter::Iterator;
 
 fn main() {
-    let triples = pythag_triples(1000);
+    let triples = euler::pythag_triples(1000);
 
     let specials: Vec<_> = triples.iter()
         .filter(|&triple| {
@@ -27,20 +27,4 @@ fn main() {
     let product = special.0 * special.1 * special.2;
     assert_eq!(product, 31875000);
     println!("{:?}", product);
-}
-
-
-/// Extremely naive way of generating pythagorean triples.
-fn pythag_triples(n: u32) -> Vec<(u32, u32, u32)> {
-    let mut triples = vec![];
-    for i in 1...n {
-        for j in i...n {
-            for k in j...n {
-                if i * i + j * j == k * k {
-                    triples.push((i, j, k));
-                }
-            }
-        }
-    }
-    triples
 }

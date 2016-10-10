@@ -11,7 +11,7 @@ fn main() {
     let primes = euler::primes(1_000_000);
 
     // take one because "nth" starts from 0
-    let prime = *primes.iter().nth(10001 - 1).unwrap();
+    let prime = *primes.get(10001 - 1).unwrap();
 
     assert_eq!(prime, 104743);
     println!("{}", prime);

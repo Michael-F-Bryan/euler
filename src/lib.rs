@@ -3,6 +3,7 @@
 
 
 #![feature(test)]
+#![feature(inclusive_range_syntax)]
 
 // Add some more lints
 #![deny(missing_docs,
@@ -109,6 +110,21 @@ pub fn greatest_common_divisor(a: usize, b: usize) -> usize {
 /// Calculate the lowest common multiple of two numbers.
 pub fn lowest_common_multiple(a: usize, b: usize) -> usize {
     a * b / greatest_common_divisor(a, b)
+}
+
+/// Extremely naive way of generating pythagorean triples.
+pub fn pythag_triples(n: u32) -> Vec<(u32, u32, u32)> {
+    let mut triples = vec![];
+    for i in 1...n {
+        for j in i...n {
+            for k in j...n {
+                if i * i + j * j == k * k {
+                    triples.push((i, j, k));
+                }
+            }
+        }
+    }
+    triples
 }
 
 

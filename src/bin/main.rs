@@ -64,15 +64,27 @@ fn execute_binaries(binaries: Vec<Challenge>, as_release: bool) {
         base_command.arg("build")
     };
 
-    println!("{}", Green.paint("Re-compiling"));
+    print!("{}", Green.paint("Re-compiling... "));
     let start = time::now();
-    cmd.output().expect("Build failed!");
+    cmd.output().expect("Compilation failed! :(");
     let duration = time::now() - start;
     println!("compilation took {}ms", duration.num_milliseconds());
+    println!("");
 
-    for challenge in binaries {
-        challenge.execute(as_release);
+    let mut total_time_taken = time::Duration::seconds(0);
+
+    for challenge in binaries.iter() {
+        println!("--------");
+        total_time_taken = total_time_taken + challenge.execute(as_release);
     }
+
+    println!("--------");
+    println!("{}", Green.bold().paint("Challenge summary"));
+
+    let ms = total_time_taken.num_milliseconds() as f64;
+    println!("Total running time: {}ms", ms);
+    println!("Number of challenges: {}", binaries.len());
+    println!("Average time: {:.2}ms", ms / binaries.len() as f64);
 }
 
 
@@ -104,9 +116,8 @@ impl Challenge {
 
     }
 
-    fn execute(&self, as_release: bool) {
+    fn execute(&self, as_release: bool) -> time::Duration {
         // First print the challenge's name
-        println!("--------");
         println!("{} {}", Green.bold().paint("Running challenge:"), self.name);
 
         // Then print a bit of description about the challenge
@@ -135,5 +146,6 @@ impl Challenge {
                  duration.num_milliseconds());
 
         println!("");
+        duration
     }
 }
