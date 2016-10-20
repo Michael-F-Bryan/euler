@@ -2,6 +2,7 @@
 name = "euler"
 version = "0.1.0"
 authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
+description = "Solutions to some of the Euler Challenges using Rust."
 
 [dependencies]
 env_logger = "*"
@@ -9,3 +10,4 @@ log = "*"
 regex = "*"
 ansi_term = "*"
 time = "0.1"
+clap = "*"

@@ -11,7 +11,7 @@ pub struct ErosthenesSeive {
 impl ErosthenesSeive {
     /// Create a seive which will find primes up to and including `n`.
     fn new(n: usize) -> ErosthenesSeive {
-        if (n as f64) > 1 * 10e9 {
+        if (n as f64) > 1.0 * 10e9 {
             // Because the seive stores everything in RAM instead of
             // segmenting it, we'd be allocating a Vec of approximately
             // 1*10^9 integers
