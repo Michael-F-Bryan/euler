@@ -9,6 +9,7 @@ extern crate regex;
 extern crate ansi_term;
 extern crate time;
 extern crate clap;
+extern crate rayon;
 
 const PACKAGE_ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 
@@ -16,9 +17,12 @@ use std::fs;
 use std::path::Path;
 use std::io::Read;
 use std::process::Command;
+use std::sync::mpsc::channel;
+use std::fmt::Write;
 
 use ansi_term::Colour::*;
 use clap::{Arg, App};
+use rayon::prelude::*;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 const AUTHORS: &'static str = env!("CARGO_PKG_AUTHORS");
@@ -95,33 +99,41 @@ fn execute_binaries(binaries: Vec<Challenge>, opts: Options) {
     println!("compilation took {}ms", duration.num_milliseconds());
     println!("");
 
-    let mut total_time_taken = time::Duration::seconds(0);
-    let mut errors = vec![];
+    let (tx, rx) = channel::<Output>();
 
-    for challenge in binaries.iter() {
-        println!("--------");
-        let (status, duration) = challenge.execute(&opts);
-        if status == 0 {
-            total_time_taken = total_time_taken + duration;
-        } else {
-            errors.push(challenge);
+    for i in (0..binaries.len()).into_par_iter() {
+        let ref challenge = binaries[i];
+        let out = challenge.execute(&opts);
+        tx.send(out).unwrap();
+    }
+
+    let mut results: Vec<Output> = rx.iter().take(binaries.len()).collect();
+    results.sort_by(|left, right| left.number.cmp(&right.number));
+    let errors: Vec<&Output> = results.iter().filter(|e: &&Output| e.return_code != 0).collect();
+
+    if !opts.quiet {
+        for result in results.iter() {
+            print!("{}", result.stdout);
         }
-
     }
 
     println!("--------");
     println!("{}", Green.bold().paint("Challenge summary"));
 
-    let ms = total_time_taken.num_milliseconds() as f64;
+    let ms = results.iter()
+        .filter(|e: &&Output| e.return_code == 0)
+        .map(|e| e.running_time)
+        .fold(time::Duration::seconds(0), |acc, e| acc + e)
+        .num_milliseconds() as f64;
     println!("Total running time: {}ms", ms);
     println!("Number of challenges: {}", binaries.len());
     println!("Average time: {:.2}ms", ms / binaries.len() as f64);
 
     if !errors.is_empty() {
         let error_challenges: String = errors.iter()
-        .map(|e| e.name.clone())
-        .collect::<Vec<String>>()
-        .join(" ");
+            .map(|e: &&Output| e.name.clone())
+            .collect::<Vec<String>>()
+            .join(" ");
         println!("{} {}", Red.bold().paint("Errors:"), error_challenges);
     }
 }
@@ -155,13 +167,19 @@ impl Challenge {
 
     }
 
-    fn execute(&self, opts: &Options) -> (i32, time::Duration) {
+    fn execute(&self, opts: &Options) -> Output {
+        let mut stdout = String::new();
+
         // First print the challenge's name
-        println!("{} {}", Green.bold().paint("Running challenge:"), self.name);
+        writeln!(stdout,
+                 "{} {}",
+                 Green.bold().paint("Running challenge:"),
+                 self.name)
+            .unwrap();
 
         // Then print a bit of description about the challenge
         if !opts.quiet {
-            println!("{}", self.read_docstring());
+            writeln!(stdout, "{}", self.read_docstring()).unwrap();
         }
 
         let path = format!("{}/target/{}/{}",
@@ -177,22 +195,27 @@ impl Challenge {
         let end = time::now();
 
         if output.status.success() {
-            println!("{}", Blue.bold().paint("Solution:"));
-            let stdout = String::from_utf8(output.stdout).unwrap();
-            println!("{}", stdout);
+            writeln!(stdout, "{}", Blue.bold().paint("Solution:")).unwrap();
+            let command_stdout = String::from_utf8(output.stdout).unwrap();
+            writeln!(stdout, "{}", command_stdout).unwrap();
         } else {
-            println!("{}", Red.bold().paint("An error occurred during execution"));
+            writeln!(stdout,
+                     "{}",
+                     Red.bold().paint("An error occurred during execution"))
+                .unwrap();
             let stderr = String::from_utf8(output.stderr).unwrap();
-            println!("{}", Red.paint(stderr));
+            writeln!(stdout, "{}", Red.paint(stderr)).unwrap();
         }
 
         let duration = end - start;
-        println!("{} {}ms",
+        writeln!(stdout,
+                 "{} {}ms",
                  Green.paint("Running time:"),
-                 duration.num_milliseconds());
+                 duration.num_milliseconds())
+            .unwrap();
 
-        println!("");
-        (output.status.code().unwrap_or(0), duration)
+        writeln!(stdout, "").unwrap();
+        Output::new(&self, stdout, duration, output.status.code().unwrap_or(0))
     }
 }
 
@@ -201,4 +224,30 @@ impl Challenge {
 struct Options {
     pub as_release: bool,
     pub quiet: bool,
+}
+
+
+/// A container for a single binary's results
+struct Output {
+    name: String,
+    number: usize,
+    stdout: String,
+    running_time: time::Duration,
+    return_code: i32,
+}
+
+impl Output {
+    pub fn new(challenge: &Challenge,
+               stdout: String,
+               running_time: time::Duration,
+               return_code: i32)
+               -> Output {
+        Output {
+            name: challenge.name.clone(),
+            number: challenge.number,
+            stdout: stdout,
+            running_time: running_time,
+            return_code: return_code,
+        }
+    }
 }
